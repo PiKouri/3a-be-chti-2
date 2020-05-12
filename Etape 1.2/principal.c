@@ -1,13 +1,19 @@
 # include "gassp72.h"
 # include "etat.h"
+# include <math.h>
 
 void timer_callback(void);
 int Periode_en_Tck=72000;
-int Periode_PWM_en_Tck;
+int Periode_PWM_en_Tck = 720;
 extern short Son[];
 extern int LongueurSon;
 extern int PeriodeSonMicroSec;
 type_etat etat;
+int compos_cont;
+short nb_it;
+double min;
+double max;
+float fact_echelle;
 
 int main(void)
 {
@@ -18,12 +24,15 @@ etat.resolution = PWM_Init_ff( TIM3, 3, Periode_PWM_en_Tck );
 etat.taille = LongueurSon;
 etat.periode_ticks = PeriodeSonMicroSec*72;
 
-short max = Son[0];
-short min = Son[0];
+max = Son[0];
+min = Son[0];
 for (int i=0; i<LongueurSon; i++) {
 	if (Son[i] > max) max = Son[i];
 	else if (Son[i] < min) min = Son[i];
 }
+compos_cont = ((min < 0) ? -min : 0);
+fact_echelle = (max + compos_cont)/etat.resolution ;
+nb_it = (short) ceilf(log2f(fact_echelle));
 
 etat.son = Son;
 
