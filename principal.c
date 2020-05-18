@@ -31,11 +31,12 @@ extern int LongueurSon;
 extern int PeriodeSonMicroSec;
 type_etat etat;
 int compos_cont;
-double min;
-double max;
+short min;
+short max;
 float fact_echelle;
 int fact_asm;
 int son_joue = 0;
+void recup_min_max(void);
 
 void sys_callback() { // Gestion du laser
 	// Démarrage DMA pour 64 points
@@ -64,7 +65,7 @@ void sys_callback() { // Gestion du laser
 	else { 
 		GPIO_Clear(GPIOB, 14);
 		/*son_joue = 0;
-		etat.position = etat.taille+1;*/
+		etat.position = etat.taille;*/
 	}
 }
 
@@ -80,20 +81,20 @@ GPIO_Configure(GPIOB, 0, OUTPUT, ALT_PPULL);
 etat.resolution = PWM_Init_ff( TIM3, 3, Periode_PWM_en_Tck );
 etat.taille = LongueurSon;
 etat.periode_ticks = PeriodeSonMicroSec*72;
+etat.son = Son;
 
-etat.position = etat.taille +1 ; // Ne joue pas le son tant qu'on n'a pas mis la position à 0
+etat.position = etat.taille ; // Ne joue pas le son tant qu'on n'a pas mis la position à 0
 
-max = Son[0];
+/*max = Son[0];
 min = Son[0];
 for (int i=0; i<LongueurSon; i++) {
 	if (Son[i] > max) max = Son[i];
 	else if (Son[i] < min) min = Son[i];
-}
-compos_cont = ((min < 0) ? -min : 0);
-fact_echelle = etat.resolution/(max + compos_cont) ;
+}*/
+recup_min_max();
+compos_cont = ((min < 0) ? -(float)min : 0);
+fact_echelle = etat.resolution/((float)max + compos_cont) ;
 fact_asm = fact_echelle * pow(2, 16);
-
-etat.son = Son;
 
 // activation de la PLL qui multiplie la fréquence du quartz par 9
  CLOCK_Configure();
