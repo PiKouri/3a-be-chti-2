@@ -14,6 +14,7 @@ short nb_it;
 double min;
 double max;
 float fact_echelle;
+int fact_asm;
 
 int main(void)
 {
@@ -31,8 +32,8 @@ for (int i=0; i<LongueurSon; i++) {
 	else if (Son[i] < min) min = Son[i];
 }
 compos_cont = ((min < 0) ? -min : 0);
-fact_echelle = (max + compos_cont)/etat.resolution ;
-nb_it = (short) ceilf(log2f(fact_echelle));
+fact_echelle = etat.resolution/(max + compos_cont) ;
+fact_asm = fact_echelle * pow(2, 16);
 
 etat.son = Son;
 
@@ -41,7 +42,7 @@ etat.son = Son;
 // initialisation du timer 4
 // Periode_en_Tck doit fournir la durée entre interruptions,
 // exprimée en périodes Tck de l'horloge principale du STM32 (72 MHz)
-Timer_1234_Init_ff( TIM4, Periode_en_Tck );
+Timer_1234_Init_ff( TIM4, etat.periode_ticks );
 // enregistrement de la fonction de traitement de l'interruption timer
 // ici le 2 est la priorité, timer_callback est l'adresse de cette fonction, a créér en asm,
 // cette fonction doit être conforme à l'AAPCS
